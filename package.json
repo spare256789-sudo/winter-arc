@@ -1,0 +1,7 @@
+{
+  "name": "winter-arc",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "mkdir -p dist && cp Winter_Arc.html dist/index.html"
+  }
+}
