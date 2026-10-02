@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b14">
+<meta name="color-scheme" content="dark">
+<!-- Fully offline: the app makes no network requests, and this policy blocks any that were added by mistake. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Winter Arc</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#070b14;--card:#0f1626;--card2:#16203a;--line:#1c2740;--tx:#f4f7fb;--mu:#8b97b0;--ice:#8fd3ff;--ice2:#4aa8e0;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(120% 50% at 50% -5%,#162a52 0,var(--bg) 62%) fixed,var(--bg);color:var(--tx);font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;min-height:100vh;min-height:100dvh}
+#app{max-width:480px;margin:0 auto;padding:18px 16px 112px}
+#app.enter{animation:rise .3s ease-out both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+button{font:inherit;color:inherit}
+.ic{display:block;flex:none}
+h1{font-size:15px;letter-spacing:.02em;margin:0;color:var(--ice);font-weight:650}
+.title{font-size:30px;font-weight:700;letter-spacing:-.025em;line-height:1.15}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.streak{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;background:#8fd3ff14;border:1px solid #8fd3ff26;color:var(--ice);font-size:13px;font-weight:600}
+.mu{color:var(--mu)}.sm{font-size:13px}.grow{flex:1;min-width:0}
+.card{background:linear-gradient(180deg,#121b30,#0e1525);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:10px;box-shadow:inset 0 1px 0 #ffffff08,0 8px 24px #00000033;color:var(--tx)}
+.card.flush{padding:4px 16px}
+.hero{display:flex;align-items:center;gap:18px;padding:20px}
+.day{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.day small{font-size:16px;color:var(--mu);font-weight:500;letter-spacing:0;margin-left:8px}
+.hero .quote{margin:8px 0 0;font-size:14px}
+.quote{margin:16px 0 20px;font-style:italic;color:#c4d0e6}
+.bar{height:6px;background:#1a2540;border-radius:9px;overflow:hidden;margin:14px 0 8px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ice2),var(--ice));border-radius:9px;transition:width .5s}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.ringw{position:relative;flex:none}.ringw svg{transform:rotate(-90deg)}
+.rt,.rp{fill:none}.rt{stroke:#1a2540}.rp{stroke:var(--ice);filter:drop-shadow(0 0 4px #8fd3ff55)}
+.rc{position:absolute;top:0;right:0;bottom:0;left:0;display:grid;place-content:center;text-align:center;line-height:1.15}
+.rc b{font-size:22px;font-weight:700;letter-spacing:-.02em}.rc span{font-size:11px;color:var(--mu)}
+.item{display:flex;align-items:center;gap:12px}
+.t{flex:1;min-width:0;display:flex;align-items:center;gap:12px;background:none;border:0;padding:0;text-align:left;cursor:pointer;font-weight:600}
+.tile{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--card2);color:#9fb4d6;flex:none;transition:.25s}
+.nm{flex:1;min-width:0;transition:color .25s}
+.cv{color:var(--mu);transition:transform .25s}.cv.up{transform:rotate(180deg)}
+.card.done{border-color:#27466f}
+.done .tile{background:#8fd3ff1f;color:var(--ice)}.done .nm{color:#a9b6cf}
+.chk{width:34px;height:34px;border-radius:50%;border:1.5px solid #3a4c75;background:none;flex:none;display:grid;place-items:center;color:#06101f;cursor:pointer;padding:0;transition:background .25s,border-color .25s,box-shadow .25s,transform .15s}
+.chk svg{opacity:0;stroke-width:2.6}
+.chk:active{transform:scale(.92)}
+.done .chk{background:linear-gradient(135deg,var(--ice2),var(--ice));border-color:transparent;box-shadow:0 0 16px #8fd3ff40}
+.done .chk svg{opacity:1}
+.chk.pop{animation:pop .35s ease-out}
+@keyframes pop{40%{transform:scale(1.18)}}
+.det{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:#c4d0e6}
+.det.in{animation:rise .25s ease-out both}
+.det b{color:var(--ice)}
+textarea,input[type=number]{width:100%;background:var(--card2);border:1px solid #243256;border-radius:12px;color:var(--tx);padding:10px 12px;font:inherit;margin-top:8px}
+textarea{min-height:64px;resize:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{background:var(--card2);border-radius:99px;padding:4px 10px;font-size:12px;color:var(--mu)}
+.seq{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:11px;letter-spacing:.06em;font-weight:700;color:var(--ice);margin:6px 0}
+.banner{display:flex;align-items:center;justify-content:center;gap:10px;background:linear-gradient(135deg,#17315a,#0f1b34);border:1px solid #2c4a7c;border-radius:18px;padding:13px 16px;margin-bottom:12px;font-weight:600;color:#d7ecff}
+.banner svg{color:var(--ice)}.banner.pop{animation:rise .4s ease-out both}
+.go{display:flex;align-items:center;gap:12px;width:100%;text-align:left;cursor:pointer;margin-bottom:0}
+.go b{display:block;font-weight:600}.go small{display:block;font-size:12px;color:var(--mu)}
+nav{position:fixed;left:0;right:0;bottom:0;background:#0a1020d9;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav div{display:flex;width:100%;max-width:480px;padding:6px 8px}
+nav button{flex:1;background:none;border:0;color:var(--mu);padding:4px 0;font-size:11px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ni{width:56px;height:30px;border-radius:99px;display:grid;place-items:center;transition:background .25s}
+nav button.on{color:var(--ice)}nav button.on .ni{background:#8fd3ff1f}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;background:linear-gradient(135deg,var(--ice2),var(--ice));color:#06101f;border:0;border-radius:16px;font-weight:700;cursor:pointer;margin-top:14px;box-shadow:0 8px 24px #4aa8e035;transition:transform .15s}
+.btn:active{transform:scale(.98)}
+.btn.off{background:var(--card2);color:var(--ice);box-shadow:none;border:1px solid #2c4a7c}
+.link{display:inline-flex;align-items:center;gap:4px;background:none;border:0;color:var(--ice);font-size:13px;font-weight:600;cursor:pointer;padding:0;margin-bottom:14px}
+ul{margin:8px 0 0;padding-left:18px}li{margin:5px 0}
+li em{color:var(--mu);font-style:normal}
+.ex{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:14px 0;text-align:left;cursor:pointer;font-weight:500}.ex:last-child{border-bottom:0}
+.xc{width:26px;height:26px}.xc svg{width:14px;height:14px}
+.btn.caps{letter-spacing:.06em}
+.phero{display:flex;align-items:center;gap:22px}
+.pstats{flex:1;display:grid;gap:14px}
+.pstats b{display:block;font-size:26px;font-weight:700;line-height:1.1;letter-spacing:-.02em}.pstats span{font-size:12px;color:var(--mu)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0 12px}
+.cell{aspect-ratio:1;border-radius:13px;background:#131d34;border:1px solid #1f2c4a;color:var(--mu);font-size:14px;font-weight:600;display:grid;place-items:center;position:relative;cursor:pointer;padding:0;transition:transform .15s}
+.cell:active{transform:scale(.94)}
+.cell.full{background:linear-gradient(135deg,var(--ice2),var(--ice));border-color:transparent;color:#06101f}
+.cell.part{border-color:var(--ice2);background:#4aa8e014;color:var(--tx)}
+.cell.now{box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px #dbeeff}
+.cell u{position:absolute;bottom:5px;width:4px;height:4px;border-radius:50%;background:#ffd36b}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--mu)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:4px;margin-right:6px;vertical-align:-1px;border:1px solid #2c4a7c}
+.legend .f{background:var(--ice);border-color:transparent}.legend .p{background:#4aa8e022}
+.legend .d{width:6px;height:6px;border-radius:50%;background:#ffd36b;border:0;margin:0 7px 0 2px;vertical-align:1px}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tgrid label{display:block;font-size:12px;color:var(--mu)}
+.tag{display:inline-block;font-size:12px;font-weight:600;color:var(--ice)}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+.hr{display:flex;align-items:center;gap:6px}
+.gear{background:none;border:0;color:var(--mu);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer;padding:0}
+#app.ob{padding-bottom:24px}
+.onb{min-height:calc(100vh - 60px);min-height:calc(100dvh - 60px);display:flex;flex-direction:column;justify-content:space-between;padding-top:8px}
+.brand{font-size:13px;letter-spacing:.38em;font-weight:600;color:var(--ice);margin:0}
+.hl{font-size:clamp(40px,12vw,54px);font-weight:800;letter-spacing:-.02em;line-height:1.02}
+.hl span{color:var(--ice)}
+.lead{color:#c4d0e6;max-width:30ch;margin:22px 0 0}
+.onb .btn{letter-spacing:.06em;margin-top:24px}
+.two{display:flex;gap:10px}.two .btn{margin-top:14px}
+.btn.danger{background:#2a1520;border:1px solid #6b2f3f;color:#ff9b9b;box-shadow:none}
+.sec{font-size:13px;font-weight:600;color:var(--mu);margin:22px 4px 8px}
+.card.row{align-items:center;gap:16px}
+.sw{flex:none;width:48px;height:29px;border-radius:99px;border:1px solid #2c3a5e;background:var(--card2);position:relative;cursor:pointer;padding:0;transition:background .25s,border-color .25s}
+.sw i{position:absolute;top:3px;left:3px;width:21px;height:21px;border-radius:50%;background:#8b97b0;transition:transform .25s,background .25s}
+.sw.on{background:#1d4a73;border-color:var(--ice2)}.sw.on i{transform:translateX(19px);background:var(--ice)}
+.btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+input[type=date]{color-scheme:dark;min-height:46px}
+/* ---- Android WebView / touch ---- */
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+body{overflow-x:hidden;overscroll-behavior-y:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+textarea,input{-webkit-user-select:text;user-select:text}
+button,[data-a],input{touch-action:manipulation}
+:root{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.chk{position:relative}.chk::after{content:"";position:absolute;top:-6px;right:-6px;bottom:-6px;left:-6px}
+.gear{width:40px;height:40px}
+.link{padding:10px 10px 10px 0;margin:-10px 0 4px}
+body.kb nav{display:none}body.kb #app{padding-bottom:24px}
+.banner.warn{background:#2a1a12;border-color:#6b4a2f;color:#ffd9b0;font-weight:500;font-size:14px;text-align:left}
+@media (max-width:360px){#app{padding-left:12px;padding-right:12px}.day{font-size:34px}.hero{gap:12px;padding:16px}.title{font-size:26px}.grid{gap:6px}}
+@media (max-height:500px){.onb{min-height:0;gap:24px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head><body><div id="app"></div>
+<nav><div id="nav"></div></nav>
+<script>
+'use strict';
+
+/* ============ CONTENT (edit text here, not in the views) ============ */
+const STORAGE_KEY = 'winterarc.v1';   // unchanged, so existing saved progress still loads
+const TOTAL_DAYS = 30;
+
+const HABITS = [
+  ['target', 'Discipline'],
+  ['phone', 'Phone Control'],
+  ['moon', 'Sleep'],
+  ['clock', 'Procrastination'],
+  ['flame', 'Habit / Urge Control']
+];
+
+const QUOTES = [
+  'Not a perfect 30 days. A better you.',
+  'Quiet work. Real change.',
+  'Do the next small thing.',
+  'Calm. Disciplined. Moving.',
+  'One honest day at a time.'
+];
+
+const WORKOUTS = {
+  A: ['PUSH', [['Push-ups', '3 × 8–15'], ['Pike push-ups', '3 × 6–12'], ['Diamond push-ups', '2 × 6–12'], ['Triceps extensions', '2 × 8–12'], ['Plank', '3 × 30–45 sec']]],
+  B: ['LEGS', [['Squats', '3 × 12–20'], ['Reverse lunges', '3 × 8–12/leg'], ['Bulgarian split squats', '2 × 8–12/leg'], ['Glute bridges', '3 × 12–20'], ['Calf raises', '3 × 15–25']]],
+  C: ['PULL + POSTURE', [['Prone Y-T-W raises', '3 × 8 each'], ['Reverse snow angels', '3 × 10–15'], ['Superman holds', '3 × 20–30 sec'], ['Backpack rows (sturdy backpack only)', '3 × 10–15'], ['Plank shoulder taps', '3 × 10–16']]],
+  D: ['UPPER + CORE', [['Push-ups', '3 × 8–15'], ['Wide push-ups', '2 × 8–15'], ['Pike push-ups', '3 × 6–12'], ['Diamond push-ups', '2 × 6–12'], ['Leg raises', '3 × 8–15'], ['Plank', '2 × 45–60 sec']]]
+};
+const MAX_MOVES = Math.max(...Object.values(WORKOUTS).map(w => w[1].length));
+// Days not listed are rest days. T = Day 29 test, R = Day 30 recovery.
+const SCHEDULE = { 1: 'A', 3: 'B', 5: 'C', 7: 'D', 9: 'A', 11: 'B', 13: 'C', 14: 'D', 16: 'A', 18: 'B', 20: 'C', 21: 'D', 23: 'A', 25: 'B', 27: 'C', 28: 'D', 29: 'T', 30: 'R' };
+
+const TESTS = [['push', 'Max clean push-ups'], ['squat', 'Max squats in 60s'], ['plank', 'Max plank (sec)'], ['lunge', 'Max reverse lunges in 60s']];
+const TEST_SETS = ['t1', 't29'];       // the only keys the test inputs may write to
+
+const TABS = [['home', 'home', 'Today'], ['body', 'dumbbell', 'Body'], ['prog', 'chart', 'Progress']];
+
+/* ============ STATE & STORAGE ============ */
+const pad = n => String(n).padStart(2, '0');
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const newDay = () => ({ c: HABITS.map(() => 0), note: '', sleep: '', w: 0, x: Array(MAX_MOVES).fill(0) });
+
+// Android WebView ships with localStorage off unless the app enables DOM storage, so check before trusting it.
+const storageOK = (() => {
+  try { const k = STORAGE_KEY + '.check'; localStorage.setItem(k, '1'); localStorage.removeItem(k); return true; } catch (e) { return false; }
+})();
+
+function loadState() {
+  let raw = null;
+  try { raw = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { /* storage blocked or corrupt */ }
+  if (!raw || typeof raw !== 'object') raw = {};
+  const s = { start: raw.start, days: {}, t1: {}, t29: {}, haptics: raw.haptics !== false };
+  TEST_SETS.forEach(k => { if (raw[k] && typeof raw[k] === 'object') s[k] = raw[k]; });
+  Object.keys(raw.days || {}).forEach(n => {          // repair partial/corrupt day records
+    const d = raw.days[n] || {};
+    s.days[n] = {
+      c: HABITS.map((_, i) => (d.c && d.c[i] ? 1 : 0)),
+      note: d.note == null ? '' : String(d.note),
+      sleep: d.sleep == null ? '' : String(d.sleep),
+      w: d.w ? 1 : 0,
+      // exercise checks; days saved before this existed count every exercise as done if the workout was
+      x: Array.from({ length: MAX_MOVES }, (_, i) => (Array.isArray(d.x) ? (d.x[i] ? 1 : 0) : (d.w ? 1 : 0)))
+    };
+  });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s.start)) s.start = null;   // no start date yet = first launch
+  return s;
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* keep running in memory */ }
+}
+
+const state = loadState();
+save();
+
+/* ============ DATES ============ */
+// Calendar-day difference via UTC, so daylight-saving changes can't shift the day by one.
+function dayFor(iso) {          // unclamped: 1 on the start date, <1 if the date is in the future
+  const [y, m, d] = iso.split('-').map(Number), now = new Date();
+  return Math.round((Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()) - Date.UTC(y, m - 1, d)) / 864e5) + 1;
+}
+function currentDay() {
+  return state.start ? Math.max(1, Math.min(TOTAL_DAYS, dayFor(state.start))) : 1;
+}
+
+/* ============ SELECTORS (read-only, never write while rendering) ============ */
+const readDay = n => state.days[n] || newDay();
+const editDay = n => state.days[n] || (state.days[n] = newDay());
+const doneCount = n => readDay(n).c.reduce((a, b) => a + b, 0);
+const isFull = n => doneCount(n) === HABITS.length;
+const workoutName = n => {
+  const s = SCHEDULE[n];
+  return !s ? 'Rest day' : s === 'T' ? 'Full-body test' : s === 'R' ? 'Recovery' : `${s} — ${WORKOUTS[s][0]}`;
+};
+
+function streak() {
+  let n = today, count = 0;
+  if (!isFull(n)) n--;                 // today still in progress: count up to yesterday
+  while (n >= 1 && isFull(n)) { count++; n--; }
+  return count;
+}
+
+/* ============ VIEW STATE ============ */
+let today = currentDay(), viewDay = today, tab = 'home', openHabit = -1, confirming = false, draftStart = '', notice = '';
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pct = (a, b) => Math.round(a / b * 100);
+
+/* ============ VIEWS ============ */
+function habitDetail(i, d) {
+  switch (i) {
+    case 0: return `<b>Choose ONE thing you don't feel like doing and do it anyway.</b><div class="chips"><span class="chip">Got out of bed when I decided to</span><span class="chip">Put my phone away</span><span class="chip">Finished something I was delaying</span><span class="chip">Cleaned something</span><span class="chip">Started an important task</span></div><textarea data-note placeholder="What did you do? (optional)">${esc(d.note)}</textarea>`;
+    case 1: return `No mindless scrolling for the first 30 minutes after waking.<p class="quote" style="margin:10px 0 0">“Did I open this for a reason?”</p><div class="mu sm">A simple self-check, not tracking.</div>`;
+    case 2: return `Aim for roughly 7–9 hours with a fairly steady schedule. One bad night? Just reset the next one.<input type="number" inputmode="decimal" enterkeyhint="done" autocomplete="off" step="0.5" min="0" max="16" data-sleep placeholder="Hours slept (optional)" value="${esc(d.sleep)}">`;
+    case 3: return `<b>5-MINUTE RULE</b><ul><li>Start the task.</li><li>Work for 5 minutes.</li><li>Then continue, or stop. Your call.</li></ul>`;
+    default: return `<div class="seq">INTERRUPT → BREAK LOOP → 10-MIN DELAY → REPLACE → CHECK</div><ul><li>Interrupt the automatic behavior.</li><li>Change your environment or pattern.</li><li>Wait 10 minutes before acting.</li><li>Replace it with another activity.</li><li>Check back in with yourself.</li></ul><p><b>One successful interruption is progress.</b></p>`;
+  }
+}
+
+const P = {
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8" fill="currentColor"/>',
+  phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/>',
+  moon: '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a6.8 6.8 0 0 0 10.5 10.5z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  flame: '<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3.2 2-4.2.3 1.2 1 2 1.8 2.2C10.5 8.5 10.8 5.5 12 3z"/>',
+  home: '<path d="M4 11l8-7 8 7v8.5a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  dumbbell: '<path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/>',
+  chart: '<path d="M5 20V11M12 20V4M19 20v-6"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  chevron: '<path d="M6 9l6 6 6-6"/>',
+  next: '<path d="M9 6l6 6-6 6"/>',
+  back: '<path d="M15 6l-6 6 6 6"/>',
+  sliders: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'
+};
+const ico = (n, s = 20) => `<svg class="ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+
+// One-shot animation flags: set by an action, consumed by the next render, so existing items never replay.
+const fx = { pop: -1, enter: false, open: false, ex: -1 };
+
+function ring(v, max, size, stroke, inner, label) {
+  const r = (size - stroke) / 2, c = 2 * Math.PI * r, m = size / 2;
+  return `<div class="ringw" style="width:${size}px;height:${size}px" role="img" aria-label="${label}"><svg width="${size}" height="${size}" aria-hidden="true">
+    <circle class="rt" cx="${m}" cy="${m}" r="${r}" stroke-width="${stroke}"/>
+    ${v > 0 ? `<circle class="rp" cx="${m}" cy="${m}" r="${r}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${(c * Math.min(v / max, 1)).toFixed(1)} ${c.toFixed(1)}"/>` : ''}
+  </svg><div class="rc">${inner}</div></div>`;
+}
+
+const backLink = label => viewDay !== today ? `<button class="link" data-a="today">${ico('back', 14)}${label}</button>` : '';
+
+function testForm(set) {
+  const t = state[set];
+  return `<div class="tgrid">${TESTS.map(([key, label]) =>
+    `<div><label>${label}<input type="number" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" autocomplete="off" min="0" data-test="${set}.${key}" value="${esc(t[key] || '')}"></label></div>`).join('')}</div>`;
+}
+
+function homeView() {
+  const d = readDay(viewDay), count = doneCount(viewDay), total = HABITS.length, arc = pct(viewDay, TOTAL_DAYS);
+  let h = `<div class="top"><h1>Winter Arc</h1><div class="hr"><span class="streak">${ico('flame', 15)}${streak()} day streak</span><button class="gear" data-a="tab" data-v="settings" aria-label="Settings">${ico('sliders', 18)}</button></div></div>
+    ${backLink(`Back to today (day ${today})`)}
+    <section class="card hero"><div class="grow">
+      <div class="day">Day ${viewDay}<small>of ${TOTAL_DAYS}</small></div>
+      <div class="quote">${QUOTES[(viewDay - 1) % QUOTES.length]}</div>
+      <div class="bar"><i style="width:${arc}%"></i></div>
+      <div class="sm mu">${arc}% of the arc</div></div>
+      ${ring(count, total, 92, 8, `<b>${count}/${total}</b><span>complete</span>`, `${viewDay === today ? 'Today' : 'Day ' + viewDay}: ${count} of ${total} complete`)}
+    </section>`;
+  if (count === total) h += `<div class="banner ${fx.pop >= 0 ? 'pop' : ''}">${ico('check', 18)}Day complete. Well done.</div>`;
+  HABITS.forEach(([icon, name], i) => {
+    const isOpen = openHabit === i, done = d.c[i];
+    h += `<div class="card ${done ? 'done' : ''}"><div class="item">
+      <button class="t" data-a="open" data-v="${i}" aria-expanded="${isOpen}"><span class="tile">${ico(icon)}</span><span class="nm">${name}</span><span class="cv ${isOpen ? 'up' : ''}">${ico('chevron', 16)}</span></button>
+      <button class="chk ${fx.pop === i ? 'pop' : ''}" data-a="chk" data-v="${i}" aria-pressed="${!!done}" aria-label="Mark ${esc(name)} done">${ico('check', 16)}</button>
+    </div>${isOpen ? `<div class="det ${fx.open ? 'in' : ''}">${habitDetail(i, d)}</div>` : ''}</div>`;
+  });
+  if (SCHEDULE[viewDay]) h += `<button class="card go" data-a="go" data-v="body"><span class="tile">${ico('dumbbell')}</span><span class="grow"><small>Body Arc</small><b>${workoutName(viewDay)}${readDay(viewDay).w ? ' ✓' : ''}</b></span><span class="mu">${ico('next', 18)}</span></button>`;
+  return h;
+}
+
+function bodyView() {
+  const s = SCHEDULE[viewDay], w = readDay(viewDay).w, moves = WORKOUTS[s] ? WORKOUTS[s][1] : [];
+  const xs = readDay(viewDay).x, k = moves.filter((_, i) => xs[i]).length;
+  let h = `<div class="top"><h1>Body Arc</h1><span class="mu sm">Day ${viewDay} of ${TOTAL_DAYS}</span></div>${backLink('Back to today')}
+    <div class="title">${workoutName(viewDay)}</div>${moves.length
+      ? `<div class="mu sm" style="margin-top:6px">${k} / ${moves.length} exercises</div><div class="bar" style="margin:10px 0 18px"><i style="width:${pct(k, moves.length)}%"></i></div>`
+      : '<div style="height:18px"></div>'}`;
+  if (w) h += `<div class="banner ${fx.pop >= 0 ? 'pop' : ''}">${ico('check', 18)}Workout complete.</div>`;
+  if (!s) {
+    h += '<div class="card">Rest day. Recover, walk, stretch, sleep well. Growth happens here.</div>';
+  } else if (s === 'T') {
+    h += `<div class="card"><b>Full-body test.</b> Warm up first, keep form clean.</div><div class="card">${testForm('t29')}</div>`;
+  } else if (s === 'R') {
+    h += `<div class="card"><ul><li>20–30 minute relaxed walk</li><li>Full-body stretching</li><li>Compare Day 29 with Day 1</li></ul></div>
+      <div class="card"><b>Day 1 → Day 29</b><ul>${TESTS.map(([k, label]) => `<li>${label}: <em>${esc(state.t1[k] || '–')}</em> → <b>${esc(state.t29[k] || '–')}</b></li>`).join('')}</ul></div>`;
+  } else {
+    h += `<div class="card flush">${moves.map(([name, sets], i) => `<button class="ex ${xs[i] ? 'done' : ''}" data-a="ex" data-v="${i}" aria-pressed="${!!xs[i]}"><span class="chk xc ${fx.ex === i ? 'pop' : ''}">${ico('check', 14)}</span><span class="nm">${name}</span><span class="mu sm">${sets}</span></button>`).join('')}</div>
+      <div class="mu sm" style="margin:8px 2px">Rest 45–90 sec between sets. Controlled reps, stop 1–2 short of failure.</div>`;
+  }
+  if (viewDay === 1) h += `<div class="card"><b>Day 1 baseline</b> <span class="mu sm">(optional, for your Day 29 comparison)</span><div style="height:4px"></div>${testForm('t1')}</div>`;
+  if (s) h += `<button class="btn ${w ? 'off' : ''} ${moves.length ? 'caps' : ''}" data-a="workout">${w ? ico('check', 18) + 'Completed — tap to undo' : moves.length ? 'COMPLETE WORKOUT' : 'Mark complete'}</button>`;
+  return h;
+}
+
+function progressView() {
+  let fullDays = 0, workoutsDone = 0, workoutsTotal = 0;
+  for (let i = 1; i <= TOTAL_DAYS; i++) {
+    if (isFull(i)) fullDays++;
+    if (SCHEDULE[i]) { workoutsTotal++; if (readDay(i).w) workoutsDone++; }
+  }
+  const p = pct(fullDays, TOTAL_DAYS);
+  let h = `<div class="top"><h1>Progress</h1><span class="streak">${ico('flame', 15)}${streak()} day streak</span></div>
+    <section class="card phero">${ring(fullDays, TOTAL_DAYS, 112, 9, `<b style="font-size:28px">${p}%</b><span>complete</span>`, `${p}% complete`)}
+      <div class="pstats"><div><b>${streak()}</b><span>Streak</span></div><div><b>${fullDays}/${TOTAL_DAYS}</b><span>Days complete</span></div></div></section>
+    <div class="card"><div class="row sm"><span>Winter Arc checklist</span><span class="mu">${fullDays}/${TOTAL_DAYS}</span></div><div class="bar"><i style="width:${p}%"></i></div>
+      <div class="row sm"><span>Body Arc workouts</span><span class="mu">${workoutsDone}/${workoutsTotal}</span></div><div class="bar" style="margin-bottom:0"><i style="width:${pct(workoutsDone, workoutsTotal)}%"></i></div></div>
+    <div class="grid">`;
+  for (let i = 1; i <= TOTAL_DAYS; i++) {
+    const c = doneCount(i);
+    h += `<button class="cell ${c === HABITS.length ? 'full' : c ? 'part' : ''}${i === today ? ' now' : ''}" data-a="day" data-v="${i}" aria-label="Open day ${i}">${i}${readDay(i).w ? '<u></u>' : ''}</button>`;
+  }
+  h += `</div><div class="legend"><span><i class="f"></i>All 5 done</span><span><i class="p"></i>Partial</span><span><i class="d"></i>Workout</span></div><div class="mu sm" style="margin-top:8px">Tap a day to open it.</div>`;
+  if (TESTS.some(([k]) => state.t29[k])) {
+    h += `<div class="card" style="margin-top:16px"><b>Day 29 test</b><ul>${TESTS.map(([k, label]) =>
+      `<li>${label}: <b>${esc(state.t29[k] || '–')}</b>${state.t1[k] ? ` <em>(Day 1: ${esc(state.t1[k])})</em>` : ''}</li>`).join('')}</ul></div>`;
+  }
+  return h;
+}
+
+function onboardingView() {
+  return `<section class="onb"><h1 class="brand">WINTER ARC</h1>
+    <div><div class="hl">30 DAYS.<br>LESS TALK.<br><span>MORE ACTION.</span></div>
+    <p class="lead">A simple 30-day system for building discipline through small daily actions.</p></div>
+    <button class="btn" data-a="start">START MY WINTER ARC</button></section>`;
+}
+
+function haptic(p) {
+  if (!state.haptics || typeof navigator === 'undefined' || !navigator.vibrate) return;
+  try { navigator.vibrate(p); } catch (e) { /* unsupported */ }
+}
+
+// Validates a draft start date and says what "today" would become.
+function startCheck(v) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) return { ok: false, msg: 'Pick a valid date.' };
+  const [y, m, d] = v.split('-').map(Number);
+  if (new Date(Date.UTC(y, m - 1, d)).getUTCMonth() !== m - 1) return { ok: false, msg: 'Pick a valid date.' };
+  const n = dayFor(v);
+  if (n < 1) return { ok: false, msg: "The start date can't be in the future." };
+  return { ok: true, msg: n > TOTAL_DAYS ? `That is past Day ${TOTAL_DAYS}. The arc would show as finished.` : `Today would be Day ${n}.` };
+}
+
+// Updates the preview in place so typing in the date field never loses focus.
+function updateStartPreview() {
+  const r = startCheck(draftStart), msg = document.getElementById('startMsg'), btn = document.getElementById('startSave');
+  if (msg) { msg.textContent = r.msg; msg.style.color = r.ok ? '' : '#ff9b9b'; }
+  if (btn) btn.disabled = !r.ok || draftStart === state.start;
+}
+
+function confirmCard(key, title, text, askLabel, yesLabel) {
+  return `<div class="card"><b>${title}</b><p class="mu sm" style="margin:6px 0 0">${text}</p>
+    ${confirming === key
+      ? `<p class="sm" style="color:#ff9b9b;margin:12px 0 0">This can't be undone.</p><div class="two"><button class="btn off" data-a="cancel">Cancel</button><button class="btn danger" data-a="${key}">${yesLabel}</button></div>`
+      : `<button class="btn danger" data-a="ask" data-v="${key}">${askLabel}</button>`}</div>`;
+}
+
+function settingsView() {
+  if (!draftStart) draftStart = state.start;
+  const [y, m, d] = state.start.split('-').map(Number);
+  const started = new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  const chk = startCheck(draftStart);
+  return `<div class="top"><h1>Settings</h1></div>
+    <button class="link" data-a="tab" data-v="home">${ico('back', 14)}Back</button>
+    ${notice ? `<div class="banner">${ico('check', 18)}${notice}</div>` : ''}
+    <div class="sec">Your arc</div>
+    <div class="card"><div class="row"><span>Started</span><span class="mu">${started}</span></div>
+      <div class="row" style="margin-top:10px"><span>Current day</span><span class="mu">Day ${today} of ${TOTAL_DAYS}</span></div></div>
+    <div class="card"><b>Change start date</b>
+      <p class="mu sm" style="margin:6px 0 0">Moves which day is today. Your saved progress stays as it is.</p>
+      <input type="date" data-start max="${toISO(new Date())}" value="${esc(draftStart)}">
+      <p class="sm" id="startMsg" style="margin:10px 0 0${chk.ok ? '' : ';color:#ff9b9b'}">${chk.msg}</p>
+      <button class="btn" id="startSave" data-a="setstart" ${chk.ok && draftStart !== state.start ? '' : 'disabled'}>Save start date</button></div>
+    <div class="sec">Preferences</div>
+    <div class="card row"><div><b>Haptic feedback</b><div class="mu sm">Light vibration on taps. Not available on every device.</div></div>
+      <button class="sw ${state.haptics ? 'on' : ''}" data-a="haptics" role="switch" aria-checked="${state.haptics}" aria-label="Haptic feedback"><i></i></button></div>
+    <div class="sec">Reset</div>
+    ${confirmCard('reset', 'Reset all progress', 'Clears habits, notes, sleep, workouts, and test results. Your start date and day stay the same.', 'Reset all progress', 'Yes, reset')}
+    ${confirmCard('restart', 'Restart Winter Arc', 'Clears all progress and returns to the start screen to begin again from Day 1.', 'Restart Winter Arc', 'Yes, restart')}
+    <div class="sec">About</div>
+    <div class="card"><b>About Winter Arc</b>
+      <p class="mu sm" style="margin:6px 0 0">A simple 30-day system for building discipline through small daily actions: five daily habits, a bodyweight Body Arc, and a Day 1 to Day 29 fitness test. Everything is stored on this device only.</p></div>`;
+}
+
+function render() {
+  const y = window.scrollY, app = document.getElementById('app'), views = { home: homeView, body: bodyView, prog: progressView, settings: settingsView };
+  app.className = state.start ? '' : 'ob';
+  app.innerHTML = state.start
+    ? (storageOK ? '' : '<div class="banner warn">Storage is unavailable on this device, so progress won\'t be saved after you close the app.</div>') + views[tab]()
+    : onboardingView();
+  if (!fx.enter) window.scrollTo(0, y);   // keep the scroll position when only content changed
+  if (fx.enter) { void app.offsetWidth; app.classList.add('enter'); }
+  document.querySelector('nav').style.display = state.start ? '' : 'none';
+  document.getElementById('nav').innerHTML = TABS.map(([id, icon, label]) =>
+    `<button data-a="tab" data-v="${id}" class="${tab === id ? 'on' : ''}"><span class="ni">${ico(icon, 22)}</span>${label}</button>`).join('');
+  fx.pop = -1; fx.enter = false; fx.open = false; fx.ex = -1;
+}
+
+/* ============ ACTIONS ============ */
+const toTop = () => window.scrollTo(0, 0);
+const ACTIONS = {
+  ex: v => {
+    const d = editDay(viewDay), n = WORKOUTS[SCHEDULE[viewDay]][1].length;
+    d.x[+v] = d.x[+v] ? 0 : 1;
+    if (d.w && d.x.slice(0, n).some(x => !x)) d.w = 0;   // unchecking one reopens a completed workout
+    fx.ex = d.x[+v] ? +v : -1; save(); haptic(d.x[+v] ? 10 : 6);
+  },
+  start:   () => { state.start = toISO(new Date()); today = viewDay = currentDay(); tab = 'home'; openHabit = -1; fx.enter = true; save(); haptic(14); toTop(); },
+  ask:     v => { confirming = v; haptic(18); },
+  setstart: () => {
+    if (!startCheck(draftStart).ok) return;
+    state.start = draftStart; draftStart = ''; today = viewDay = currentDay(); openHabit = -1;
+    notice = 'Start date updated.'; save(); haptic(12);
+  },
+  reset: () => {
+    if (confirming !== 'reset') return;                 // only runs after the confirmation step
+    state.days = {}; state.t1 = {}; state.t29 = {};
+    viewDay = today; openHabit = -1; confirming = false; notice = 'All progress cleared.'; save(); haptic([14, 40, 14]); toTop();
+  },
+  haptics: () => { state.haptics = !state.haptics; save(); haptic(12); },
+  cancel:  () => { confirming = false; },
+  restart: () => {
+    if (confirming !== 'restart') return;               // only runs after the confirmation step
+    state.start = null; state.days = {}; state.t1 = {}; state.t29 = {};
+    today = viewDay = 1; tab = 'home'; openHabit = -1; confirming = false; draftStart = ''; notice = ''; fx.enter = true; save(); haptic([14, 40, 14]); toTop();
+  },
+  chk:     v => { const d = editDay(viewDay); d.c[+v] = d.c[+v] ? 0 : 1; fx.pop = d.c[+v] ? +v : -1; save(); haptic(d.c[+v] ? 12 : 6); },
+  open:    v => { openHabit = openHabit === +v ? -1 : +v; fx.open = openHabit >= 0; },
+  tab:     v => { confirming = false; draftStart = ''; notice = ''; fx.enter = tab !== v; tab = v; toTop(); },
+  go:      v => { fx.enter = true; tab = v; toTop(); },
+  day:     v => { fx.enter = true; viewDay = +v; tab = 'home'; openHabit = -1; toTop(); },
+  today:   () => { viewDay = today; openHabit = -1; },
+  workout: () => {
+    const d = editDay(viewDay), moves = WORKOUTS[SCHEDULE[viewDay]];
+    d.w = d.w ? 0 : 1;
+    if (d.w && moves) moves[1].forEach((_, i) => { d.x[i] = 1; });   // completing the workout checks every exercise
+    fx.pop = d.w ? 1 : -1; save(); haptic(d.w ? [14, 40, 14] : 8);
+  }
+};
+
+const LIGHT_TAP = ['tab', 'go', 'day', 'today', 'open', 'cancel'];
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if (!el || !ACTIONS[el.dataset.a]) return;
+  if (LIGHT_TAP.includes(el.dataset.a)) haptic(6);
+  ACTIONS[el.dataset.a](el.dataset.v);
+  syncHistory();
+  render();
+});
+
+// Typing saves immediately but never re-renders, so the cursor stays put.
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.hasAttribute('data-note')) editDay(viewDay).note = t.value;
+  else if (t.hasAttribute('data-sleep')) editDay(viewDay).sleep = t.value;
+  else if (t.hasAttribute('data-start')) { draftStart = t.value; updateStartPreview(); return; }
+  else if (t.dataset.test) {
+    const [set, key] = t.dataset.test.split('.');
+    if (!TEST_SETS.includes(set)) return;
+    state[set][key] = t.value;
+  } else return;
+  save();
+});
+
+// If the app stays open past midnight, roll over to the new day when it's reopened.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { save(); return; }
+  if (!state.start) return;
+  const n = currentDay();
+  if (n === today) return;
+  if (viewDay === today) viewDay = n;
+  today = n;
+  render();
+});
+
+/* ============ ANDROID BACK BUTTON ============ */
+// History holds at most two entries: the root (Today) and one screen above it, so Back always
+// returns to Today first and only then lets the OS close the app.
+const atRoot = () => !state.start || (tab === 'home' && viewDay === today);
+const histDepth = () => (history.state && history.state.d) || 0;
+
+function syncHistory() {
+  try {
+    if (atRoot()) { if (histDepth() === 1) history.back(); }          // popstate re-renders the root view
+    else if (histDepth() === 0) history.pushState({ d: 1, tab, viewDay }, '');
+    else history.replaceState({ d: 1, tab, viewDay }, '');
+  } catch (e) { /* history unavailable: winterArcBack() still works */ }
+}
+
+function applyHistory(st) {
+  confirming = false; draftStart = ''; notice = ''; openHabit = -1;
+  if (st && st.d === 1 && state.start) { tab = st.tab; viewDay = st.viewDay; } else { tab = 'home'; viewDay = today; }
+  fx.enter = true; toTop(); render();
+}
+
+window.addEventListener('popstate', e => applyHistory(e.state));
+
+// For wrappers that route the hardware Back button to the page. true = handled here, false = let the OS close the app.
+window.winterArcBack = function () {
+  if (atRoot()) return false;
+  if (histDepth() === 1) history.back(); else applyHistory(null);
+  return true;
+};
+document.addEventListener('backbutton', e => {                       // Cordova-style wrappers
+  if (window.winterArcBack()) e.preventDefault();
+  else if (navigator.app && navigator.app.exitApp) navigator.app.exitApp();
+});
+try { history.replaceState({ d: 0 }, ''); } catch (e) { /* ignore */ }
+
+/* ============ KEYBOARD ============ */
+const isField = el => !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+document.addEventListener('focusin', e => {
+  if (!isField(e.target)) return;
+  document.body.classList.add('kb');                                  // hides the bottom nav so it can't sit on top of the keyboard
+  setTimeout(() => { try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (x) { /* ignore */ } }, 300);
+});
+document.addEventListener('focusout', () => setTimeout(() => {
+  if (!isField(document.activeElement)) document.body.classList.remove('kb');
+}, 50));
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') e.target.blur(); });   // Done closes the keyboard
+
+fx.enter = !state.start;
+render();
+</script></body></html>
