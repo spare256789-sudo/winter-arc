@@ -1,0 +1,25 @@
+name: Build Winter Arc APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Winter Arc
+        uses: actions/checkout@v4
+
+      - name: Prepare web files
+        run: |
+          mkdir -p dist
+          cp Winter_Arc.html dist/index.html
+
+      - name: Build APK
+        uses: cemcoe/web-to-apk-action@v1
+        with:
+          app_name: "Winter Arc"
+          app_id: "com.spare256789.winterarc"
+          build_command: "echo Web files already prepared"
+          web_dir: "dist"
