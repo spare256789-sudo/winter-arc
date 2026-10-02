@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get Winter Arc
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js 22
@@ -16,15 +16,57 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Prepare web files
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Prepare web app
         run: |
           mkdir -p dist
           cp Winter_Arc.html dist/index.html
 
+      - name: Create Capacitor project
+        run: |
+          cat > package.json <<'EOF'
+          {
+            "name": "winter-arc",
+            "version": "1.0.0",
+            "private": true,
+            "scripts": {
+              "build": "mkdir -p dist && cp Winter_Arc.html dist/index.html"
+            }
+          }
+          EOF
+
+          npm install @capacitor/core@8 @capacitor/android@8
+          npm install --save-dev @capacitor/cli@8
+
+          cat > capacitor.config.ts <<'EOF'
+          import type { CapacitorConfig } from '@capacitor/cli';
+
+          const config: CapacitorConfig = {
+            appId: 'com.spare256789.winterarc',
+            appName: 'Winter Arc',
+            webDir: 'dist'
+          };
+
+          export default config;
+          EOF
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      - name: Copy web app into Android project
+        run: npx cap copy android
+
       - name: Build APK
-        uses: cemcoe/web-to-apk-action@v1
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
-          app_name: "Winter Arc"
-          app_id: "com.spare256789.winterarc"
-          build_command: "echo Web files already prepared"
-          web_dir: "dist"
+          name: Winter-Arc-APK
+          path: android/app/build/outputs/apk/debug/app-debug.apk
